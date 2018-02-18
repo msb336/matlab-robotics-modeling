@@ -35,10 +35,12 @@ classdef robot <handle
             obj.links = properties.links;
             obj.connections = properties.connections;
             obj.dof = properties.dof;
-            [~,obj.T] = buildtransform(obj.links,obj.dof, 1);
+            [obj.T] = buildtransform(obj.links, obj.connections, obj.dof);
             obj.position = zeros(3,length(obj.T));
+            obj.move(zeros(size(obj.T)));
             obj.workspace = properties.workspace;
         end
+        
         function obj = move(obj,vector)
             contact = 0;
             for i = 1:length(obj.T)
@@ -53,14 +55,20 @@ classdef robot <handle
             end
             if ~contact
                 obj.position = points(1:3,:);
+                if obj.position(3,end) <= 0.1 && ...
+                        inpolygon(obj.position(1,end), obj.position(2,end), ...
+                        obj.workspace(:,1), obj.workspace(:,2))
                 obj.path = [obj.path obj.position(:,end)];
+                end
             end
         end
         function obj = show(obj)
             hold off
             plot3(0,0,0);
             plot3dvectors(obj.workspace);
-            plot3dvectors(obj.position(1:3,:), 'b*-')
+            for i = 1:length(obj.connections)
+                plot3dvectors(obj.position(:,obj.connections(i,:)), '-')
+            end
             bounds = [-10 20 -10 20 -1 10];
             axis(bounds)
             xlabel('x');ylabel('y');zlabel('z');
