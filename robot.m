@@ -28,8 +28,8 @@ classdef robot <handle
         T
         position
         path = [];
+        workspace;
     end
-    
     methods
         function obj = robot(properties)
             obj.links = properties.links;
@@ -37,25 +37,34 @@ classdef robot <handle
             obj.dof = properties.dof;
             [~,obj.T] = buildtransform(obj.links,obj.dof, 1);
             obj.position = zeros(3,length(obj.T));
+            obj.workspace = properties.workspace;
         end
-        
         function obj = move(obj,vector)
+            contact = 0;
             for i = 1:length(obj.T)
-                point = obj.T{i}(vector)*[zeros(3,1);1];
-                obj.position(:,i) = point(1:3,:);
-                
+                points(:,i) = obj.T{i}(vector)*[zeros(3,1);1];
+                if points(3,i) < 0
+                    clc
+                    s = warning('robot is contacting ground\n');
+                    fprintf(s);
+                    contact = 1;
+                    break
+                end
             end
-            obj.path = [obj.path obj.position(:,end)];
+            if ~contact
+                obj.position = points(1:3,:);
+                obj.path = [obj.path obj.position(:,end)];
+            end
         end
-        
         function obj = show(obj)
             hold off
             plot3(0,0,0);
+            plot3dvectors(obj.workspace);
             plot3dvectors(obj.position(1:3,:), 'b*-')
-            axis([-10 10 -10 10 -10 10])
+            bounds = [-10 20 -10 20 -1 10];
+            axis(bounds)
             xlabel('x');ylabel('y');zlabel('z');
         end
     end
-    
 end
 
