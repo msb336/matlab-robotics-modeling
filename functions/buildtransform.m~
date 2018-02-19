@@ -15,8 +15,8 @@ end
 for i = 1:length(connections)
     list = connections{i};
     switch length(list)
-%         case 4
-%             [T,r] = fourbar(T,r, linkends, list);
+        case 4
+            [T,r] = fourbar(T,r, linkends, list);
         otherwise
             [T,r, j] = multilink(T,r, list, linkends, df, j);
     end

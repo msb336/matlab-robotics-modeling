@@ -29,36 +29,39 @@ classdef robot <handle
         position
         path = [];
         workspace;
+        aesthetics;
     end
     methods
         function obj = robot(properties)
             obj.links = properties.links;
             obj.connections = properties.connections;
             obj.dof = properties.dof;
-            [obj.T] = buildtransform(obj.links, obj.connections, obj.dof);
+            obj.aesthetics = properties.aesthetics;
+            [obj.T, degf] = buildtransform(obj.links, obj.connections, obj.dof);
             obj.position = zeros(3,length(obj.T));
-            obj.move(zeros(size(obj.T)));
             obj.workspace = properties.workspace;
+            obj.move(zeros(degf, 1));
+            
         end
         
         function obj = move(obj,vector)
             contact = 0;
             for i = 1:length(obj.T)
                 points(:,i) = obj.T{i}(vector)*[zeros(3,1);1];
-                if points(3,i) < 0
-                    clc
-                    s = warning('robot is contacting ground\n');
-                    fprintf(s);
-                    contact = 1;
-                    break
-                end
+%                 if points(3,i) < 0
+%                     clc
+%                     s = warning('robot is contacting ground\n');
+%                     fprintf(s);
+%                     contact = 1;
+%                     break
+%                 end
             end
             if ~contact
                 obj.position = points(1:3,:);
                 if obj.position(3,end) <= 0.1 && ...
                         inpolygon(obj.position(1,end), obj.position(2,end), ...
                         obj.workspace(:,1), obj.workspace(:,2))
-                obj.path = [obj.path obj.position(:,end)];
+                        obj.path = [obj.path obj.position(:,end)];
                 end
             end
         end
@@ -66,10 +69,11 @@ classdef robot <handle
             hold off
             plot3(0,0,0);
             plot3dvectors(obj.workspace);
-            for i = 1:length(obj.connections)
-                plot3dvectors(obj.position(:,obj.connections(i,:)), '-')
+            for i = 1:length(obj.aesthetics)
+                cons = obj.aesthetics{i};
+                plot3dvectors(obj.position(:, cons), '*-')
             end
-            bounds = [-10 20 -10 20 -1 10];
+            bounds = [-5 15 -5 15 -1 10];
             axis(bounds)
             xlabel('x');ylabel('y');zlabel('z');
         end
