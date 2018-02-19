@@ -22,5 +22,6 @@ for i = 1:length(varargin)-it
         plot3(dataset(:,1), dataset(:,2), dataset(:,3), spec);
     end
 end
+xlabel('x');ylabel('y');zlabel('z');
 end
 

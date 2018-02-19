@@ -76,6 +76,7 @@ classdef robot <handle
             bounds = [-5 15 -5 15 -1 10];
             axis(bounds)
             xlabel('x');ylabel('y');zlabel('z');
+            view([-90,0])
         end
     end
 end
