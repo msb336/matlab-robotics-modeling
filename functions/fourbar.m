@@ -1,4 +1,4 @@
-function [T] = fourbar(T, links, connections, xindex)
+function [T] = fourbarn(T, links, connections, xindex)
 % phi = angle of rotation for rotating joint
 if isempty(xindex)
     xindex = 1;
