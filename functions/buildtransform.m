@@ -4,7 +4,7 @@ T = cell(length(linkends), 1);
 r = T;
 ref = [0 0];
 for ii = 1:length(linkends)
-r{ii} = @(x)eye(4);
+    r{ii} = @(x)eye(4);
 end
 T{1} = @(x)(eye(4));
 for d = 1:length(df{1})
@@ -19,7 +19,15 @@ for i = 1:length(connections)
     list = connections{i};
     switch length(list)
         case 4
-            [T] = fourbar(T, linkends, list, ref(ref(:,1)==list(1), 2));
+            T{list(1)} = @(x)translate(linkends(list(1),:));
+            T{list(4)} = @(x)translate(linkends(list(4),:));
+            [T1] = ...
+                @(x)fourbarsetup(T, linkends, list, 1, x, ref(ref(:,1)==list(1), 2));
+            [T2] = ...
+                @(x)fourbarsetup(T, linkends, list, 2, x, ref(ref(:,1)==list(1), 2));
+            T{list(2)} = T1;
+            T{list(3)} = T2;
+
         otherwise
             [T,r, j, ref] = multilink(T,r, list, linkends, df, j, ref);
     end
@@ -46,4 +54,14 @@ for k = 2:length(list)
         T{index} = @(x)T{index}(x)*r{list(1)}(x);
     end
 end
+end
+
+function [out] = fourbarsetup(T, links, list, numout, variable, index)
+[new2, new3] = fourbarn(links, list, var(index));
+if numout == 1
+    out = T{list(1)}(variable)*translate(new2);
+else
+    out = T{list(1)}(variable)*translate(new3);
+end
+
 end

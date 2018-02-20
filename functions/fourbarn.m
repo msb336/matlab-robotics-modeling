@@ -1,6 +1,5 @@
-function [anew, bnew, psi, lastth, err] = fourbarn(links, connections, th, lastth)
+function [anew, bnew] = fourbarn(links, connections, th)
 % phi = angle of rotation for rotating joint
-z = lastth;
 phi = pi/2-th;
 O = links(connections(1),:);
 oa = links(connections(2),:)- O;
@@ -12,13 +11,11 @@ a4 = norm(links(connections(4),:) - O);
 list = (0:0.005:pi);
 anew = rotate(phi, 'thx')*translate(oa)*[0;0;0;1];
 anew = anew(1:3)';
-circ = a3*[zeros(size(list));cos(list);sin(list)]+links(connections(4),:)';
+
 for i = list
 
-    potb1 = a2*[0 -cos(lastth + i) sin(lastth+i)]+anew;
-    potb2 = a2*[0 -cos(lastth-i) sin(lastth - i)]+anew;
+    potb1 = a2*[0 -cos(i) sin(i)]+anew;
     check1 = ~intersection([potb1;links(connections(4),:)], [anew; O]);
-    check2 = ~intersection([potb2;links(connections(4),:)], [anew; O]);
     if abs(norm(potb1 - links(connections(4),:)) - a3) <= 0.02 && check1
         bnew = potb1;
         lastth = i;
