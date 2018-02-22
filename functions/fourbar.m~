@@ -1,0 +1,23 @@
+function [T] = fourbar(T, links, connections, rotation, axis)
+%%FOURBAR returns transformation matrices for four bar linkage where
+%%opposite links are parallel
+i1 = connections(1)*2-1;
+i2 = connections(2)*2-1;
+i3 = connections(3)*2-1;
+i4 = connections(4)*2-1;
+T(:,i4:i4+3) = ...
+    T(:,i1:i1+3) ...
+    *translate(links(i4,:)-links(i1,:));
+
+T(:,i1:i1+3) = ...
+    T(:,i1:i1+3)*rotate(rotation, axis);
+
+T(:,i2:i2+3) = ...
+    T(:,i1:i1+3) ...
+    *translate(links(i2,:)-links(i1,:));
+
+T(:,i3:i3+3) = ...
+    T(:,i4:i4+3)*rotate(rotation, axis) ...
+    *translate(links(i3,:)-links(i4,:));
+
+end

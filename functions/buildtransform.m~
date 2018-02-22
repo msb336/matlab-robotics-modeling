@@ -1,50 +1,80 @@
-function [ T,j ] = buildtransform(linkends, connections, df)
+function [Tnew] = buildtransform(linkends, connections, x, df)
 j = 0;
-T = cell(length(linkends), 1);
-r = T;
-r{1} = @(x)eye(4);
-T{1} = @(x)(eye(4));
-
-for d = 1:length(df{1})
-    j = j + 1;
-    t = @(x)translate(x(j), df{1}{d});
-    rt = @(x)rotate(x(j), df{1}{d});
-    T{1} = @(x)(T{1}(x)*rt(x)*t(x));
+ref = zeros(length(linkends),2);
+for ii = 1:4:length(linkends)*4
+    T(1:4, ii:ii+3) = eye(4);
 end
+index = 1:4:length(T);
+for i = 1:length(df)
+    for d = 1:length(df{i})
+        if isa(df{i}{d}, 'char')
+            if strcmp(df{i}{d}, 'fixed')
+                switch length(df{i})
+                    case 1
+                        T(:, index(i):index(i)+3) = ...
+                            translate(linkends(i,:))*rotate(ref;
+                        
+                    case 2
+                        T(:, index(i):index(i)+3) = ...
+                            T(:, index(df{i}{2}):index(df{i}{2})+3)* ...
+                            translate(linkends(i,:) - linkends(df{i}{2}, :));
 
-for i = 1:length(connections)
-    list = connections{i};
-    switch length(list)
-        case 4
-            [T,r] = fourbar(T,r, linkends, list);
-        otherwise
-            [T,r, j] = multilink(T,r, list, linkends, df, j);
+                end
+                fixed(i) = true;
+            else
+            j = j + 1;
+            T(:, index(i):index(i)+3) = ...*translate(x(j))
+                translate(linkends(i,:) - linkends(1,:))*rotate(x(j), df{i}{d});
+            ref(i, 2) = j;
+            end
+            
+        else
+            ref(i,1) = [df{i}{d}];
+        end
     end
 end
+Tnew = T;
+for k = 1:length(connections)
+    if ~fixed(connections{k}(4))
+        fullbar = true;
+    else
+        fullbar = false;
+    end
+    rotvec =ref(ref(:,1) ==connections{k}(1)&ref(:,2)~=0, 2);
+    Tnew = fourbar(Tnew, linkends, connections{k}, x(rotvec), df{connections{k}(1)}{1}, fullbar);
 end
 
-function [T,r] = fourbar(T,r, links, connections)
-O = links(connections(1),:);
-A = links(connections(2),:)- O;
-B = links(connections(3),:) - O;
-C = links(connections(4),:) - O;
-trans = translate(A);
-T{connections(2)} = @(x)T{connections(1)}(x)*trans*r{list(1)}(x)';
-
 end
 
-function [T,r, j] = multilink(T,r, list, linkends, df, j)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function [T,r, j,reference] = multilink(T,r, list, linkends, df, j,reference)
 for k = 2:length(list)
     index = list(k);
     if isempty(T{index})
         point = linkends(index,:);
         ref = linkends(list(k-1),:);
         trans = translate(point-ref);
-        
         T{index} = @(x)T{list(k-1)}(x)*trans*r{list(1)}(x)';
-        r{index} = @(x)eye(4);
         for d = 1:length(df{index})
             j = j + 1;
+            reference = [reference; index j];
             t = @(x)translate(x(j), df{index}{d});
             r{index} = @(x)rotate(x(j), df{index}{d});
             T{index} = @(x)(T{index}(x)*r{index}(x)*t(x));
@@ -53,4 +83,14 @@ for k = 2:length(list)
         T{index} = @(x)T{index}(x)*r{list(1)}(x);
     end
 end
+end
+
+function [out] = fourbarsetup(T, links, list, numout, variable, index)
+[new2, new3] = fourbarn(links, list, var(index));
+if numout == 1
+    out = T{list(1)}(variable)*translate(new2);
+else
+    out = T{list(1)}(variable)*translate(new3);
+end
+
 end

@@ -14,4 +14,5 @@ if nargin == 2
 else     
     tmat(1:3,4) =x(:);
 end
+end
 
