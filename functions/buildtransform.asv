@@ -5,7 +5,7 @@ modify = zeros(length(linkends),2);
 for ii = 1:4:length(linkends)*4
     T(1:4, ii:ii+3) = eye(4);
 end
-T(:,1:4) = translate(linkends(1,:));
+
 index = 1:4:length(T);
 for i = 1:length(df)
     for d = 1:length(df{i})
@@ -13,9 +13,9 @@ for i = 1:length(df)
             if strcmp(df{i}{d}, 'fixed')
                 switch length(df{i})
                     case 1
-                        T(:, index(i):index(i)+3) = T(:,1:4) ...
-                            *translate(linkends(i,:)-linkends(1,:))...
-                            *rotate(x(4), 'thx');
+                        T(:, index(i):index(i)+3) = ...
+                            translate(linkends(i,:))...
+                            *rotate(x(2), 'thx');
                         
                     case 2
                         T(:, index(i):index(i)+3) = ...
@@ -29,12 +29,8 @@ for i = 1:length(df)
                 
             else
                 j = j + 1;
-                if d == 1
-                    T(:, index(i):index(i)+3) = T(:,1:4)*...
-                    translate(linkends(i,:)-linkends(1,:));
-                end
                 T(:, index(i):index(i)+3) = ...
-                    T(:, index(i):index(i)+3)*translate(x(j), df{i}{d})*rotate(x(j), df{i}{d});
+                    translate(linkends(i,:))*translate(x(j), df{i}{d})*rotate(x(j), df{i}{d});
                 ref(i, 2) = j;
             end
             
@@ -66,10 +62,57 @@ for k = 1:length(connections)
                     p1 = Tnew(:, index(fixedp):index(fixedp)+3)*[0;0;0;1];
                     p2 = Tnew(:, index(modded):index(modded)+3)*[0;0;0;1];
                     vec = (p2(1:3)-p1(1:3))/norm(p2(1:3)-p1(1:3));
-                    Tnew(:, index(fixedp2):index(fixedp2)+3) = translate(norm(linkends(fixedp2, :) - linkends(modded,:))*[vec])...
-                        *Tnew(:, index(modded):index(modded)+3);
+                    Tnew(:, index(fixedp2):index(fixedp2)+3) = Tnew(:, index(modded):index(modded)+3)...
+                        *Tnew(:,index(fixedp):index(fixedp)+3)*translate(linkends(fixedp2, :) - linkends(modded,:));
             end
         end
     end
 end
 end
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    function [T,r, j,reference] = multilink(T,r, list, linkends, df, j,reference)
+    for k = 2:length(list)
+        index = list(k);
+        if isempty(T{index})
+            point = linkends(index,:);
+            ref = linkends(list(k-1),:);
+            trans = translate(point-ref);
+            T{index} = @(x)T{list(k-1)}(x)*trans*r{list(1)}(x)';
+            for d = 1:length(df{index})
+                j = j + 1;
+                reference = [reference; index j];
+                t = @(x)translate(x(j), df{index}{d});
+                r{index} = @(x)rotate(x(j), df{index}{d});
+                T{index} = @(x)(T{index}(x)*r{index}(x)*t(x));
+            end
+        else
+            T{index} = @(x)T{index}(x)*r{list(1)}(x);
+        end
+    end
+    end
+    
+    function [out] = fourbarsetup(T, links, list, numout, variable, index)
+    [new2, new3] = fourbarn(links, list, var(index));
+    if numout == 1
+        out = T{list(1)}(variable)*translate(new2);
+    else
+        out = T{list(1)}(variable)*translate(new3);
+    end
+    
+    end
