@@ -19,6 +19,7 @@ rprops.dof = cell(length(rprops.links),1);
 rprops.dof{1} = {'x','thz'};
 rprops.dof{3} = {'thx'};
 rprops.dof{2} = {'thx'};
+rprops.numdof = 1;
 rprops.workspace = [1 1 0; 12 1 0; 12 9.5 0; 1 9.5 0; 1 1 0];
 
 end

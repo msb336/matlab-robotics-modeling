@@ -30,24 +30,28 @@ classdef robot <handle
         path = [];
         workspace;
         aesthetics;
+        dofnum;
     end
     methods
         function obj = robot(properties)
             obj.links = properties.links;
             obj.connections = properties.connections;
             obj.dof = properties.dof;
+            obj.dofnum = properties.dofnum;
             obj.aesthetics = properties.aesthetics;
-            [obj.T, degf] = buildtransform(obj.links, obj.connections, obj.dof);
+            obj.T = @(x)buildtransform(obj.links, obj.connections, x, obj.dof);
             obj.position = zeros(3,length(obj.T));
             obj.workspace = properties.workspace;
-            obj.move(zeros(degf, 1));
+            obj.move(zeros(obj.dofnum, 1));
             
         end
         
         function obj = move(obj,vector)
             contact = 0;
-            for i = 1:length(obj.T)
-                points(:,i) = obj.T{i}(vector)*[zeros(3,1);1];
+            transform = obj.T(vector);
+            index = 1:4:length(transform);
+            for i = 1:length(index)
+                points(:,i) = transform(:,index(i):index(i)+3)*[0;0;0;1];
 %                 if points(3,i) < 0
 %                     clc
 %                     s = warning('robot is contacting ground\n');

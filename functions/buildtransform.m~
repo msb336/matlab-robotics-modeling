@@ -12,8 +12,7 @@ for i = 1:length(df)
                 switch length(df{i})
                     case 1
                         T(:, index(i):index(i)+3) = ...
-                            translate(linkends(i,:))...
-                            *rotate(x(2), 'thx');
+                            translate(linkends(i,:))*rotate(ref;
                         
                     case 2
                         T(:, index(i):index(i)+3) = ...
