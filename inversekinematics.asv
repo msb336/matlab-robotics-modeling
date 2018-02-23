@@ -1,0 +1,29 @@
+%% Inverse Kinematics
+
+clear all;close all;clc; addpath functions
+%% Build Robot
+rprops = testbot();
+
+%%
+r1 = robot(rprops);
+figure;
+l = -pi/4:0.05:pi/4;
+% rel = [];
+% for t = l
+%     for tt = l
+%         r1.move([0 pi t tt]);
+%         endeffector = r1.position(:,end);
+%         if abs(endeffector(3)) <= 0.02
+%             rel = [rel; t tt endeffector(1) endeffector(2)];
+%             break
+%         end
+%     end
+% end
+%%
+for t = l
+    for tt = [l, -l]
+    r1.move([0 pi/2 t tt]);
+    r1.show();
+    pause(0.001)
+    end
+end
