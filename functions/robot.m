@@ -62,10 +62,11 @@ classdef robot <handle
             end
             if ~contact
                 obj.position = points(1:3,:);
-                if abs(obj.position(3,end)) <= 0.1 && ...
+                if... abs(obj.position(3,end)) <= 0.5 && 
                         inpolygon(obj.position(1,end), obj.position(2,end), ...
                         obj.workspace(:,1), obj.workspace(:,2))
-                        obj.path = [obj.path obj.position(:,end)];
+     
+                        obj.path = [obj.path [obj.position(1:2,end); 0]];
                 end
             end
         end
