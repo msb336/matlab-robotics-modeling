@@ -32,7 +32,6 @@ classdef robot <handle
         aesthetics;
         dofnum;
         constraints;
-        ax;
     end
     methods
         function obj = robot(properties)
@@ -52,8 +51,6 @@ classdef robot <handle
             index = 1:4:length(transform);
             for i = 1:length(index)
                 points(:,i) = transform(:,index(i):index(i)+3)*[0;0;0;1];
-                a = transform(:,index(i):index(i)+3)*[0 1 0 0 0 0; 0 0 0 1 0 0; 0 0 0 0 0 1;ones(1,6)];
-                obj.ax{i} = a(1:3,:);
 %                 if points(3,i) < 0
 %                     clc
 %                     s = warning('robot is contacting ground\n');
@@ -72,24 +69,17 @@ classdef robot <handle
                 end
             end
         end
-        function obj = show(obj, a)
-            if nargin == 1
-                a = 0;
-            end
+        function obj = show(obj, ax)
             hold off
             plot3(0,0,0);
             plot3dvectors(obj.workspace);
             for i = 1:length(obj.aesthetics)
                 cons = obj.aesthetics{i};
                 plot3dvectors(obj.position(:, cons), '*-')
-
+                if ax
+                    plot3dvectors(obj.ax
             end
-            if a
-                for i = 1:length(obj.links)
-                    plot3dvectors(obj.ax{i}, '--')
-                end
-            end
-            bounds = [-5 15 -5 15 -5 10];
+            bounds = [-5 15 -5 15 -1 10];
             axis(bounds)
             xlabel('x');ylabel('y');zlabel('z');
         end
