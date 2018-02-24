@@ -1,24 +1,14 @@
-function [T] = fourbar(T, links, connections, rotation, axis, fullbar)
+function [T] = fourbar(T, points, joints, f,j, x, axis)
 %%FOURBAR returns transformation matrices for four bar linkage where
 %%opposite links are parallel
-index = 1:4:200;
-i1 = index(connections(1));
-i2 = index(connections(2));
-i3 = index(connections(3));
-i4 = index(connections(4));
-
-if fullbar
-T(:,i4:i4+3) =...
-    T(:,i1:i1+3) ...
-    *translate(links(connections(4),:)-links(connections(1),:));
+if any(joints == 3)
 end
 
-T(:,i1:i1+3) = ...
-    T(:,i1:i1+3)*rotate(rotation, axis);
-T(:,i2:i2+3) = ...
-    T(:,i1:i1+3) ...
-    *translate(links(connections(2),:)-links(connections(1),:));
-T(:,i3:i3+3) = ...
-    T(:,i4:i4+3)*rotate(rotation, axis) ...
-    *translate(links(connections(3),:)-links(connections(4),:));
+T{f} = T{j}*rotate(x,axis)*translate(points(f,:)-points(j,:))*rotate(-x,axis);
+i = joints(joints~=f & joints~=j);
+
+T{i(1)} = T{i(1)}*T{j}*translate(points(i(1),:)-points(j,:));
+T{i(2)} = T{i(2)}*T{i(1)}*rotate(x,axis)*translate(points(i(2),:)-points(i(1),:));
+
+
 end

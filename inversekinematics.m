@@ -6,6 +6,7 @@ rprops = testbot();
 
 %%
 r1 = robot(rprops);
+r1.show();
 % rel = [];
 % for t = l
 %     for tt = l
@@ -20,17 +21,21 @@ r1 = robot(rprops);
 %%
 inpaper = @(t)(11.5*sin(t-pi/2)+11.5)*0.5;
 th = @(t)pi/2*sin(t);
-
+dist = [];
 i = 0;
-while i <= 11.5
-   	i = i+0.1;
-    for th = [-pi/2:0.1:pi/2 pi/2:-0.1:-pi/2]
-            x = [inpaper(i) pi rprops.thfunc(th) th];
-            r1.move(x);
-            r1.show()
-            view([-90 0])
-            pause(0.1);
-    end
-    
+while true
+    i = i+1;
+        secondary = rprops.thfunc(th(i*0.1));
+
+        r1.move(0, th(i*0.01), 0, 0);
+        subplot(2,1,1)
+        r1.show();
+%         view([-90 0])
+        dist = [dist; norm(r1.position(:,8) - r1.position(:,9))];
+        subplot(2,1,2)
+        plot(1:length(dist), dist);
+        
+        
+        pause(0.000001);
 end
-    plot3dvectors(r1.path);
+plot3dvectors(r1.path);

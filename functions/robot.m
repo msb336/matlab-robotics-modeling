@@ -31,24 +31,23 @@ classdef robot <handle
         workspace;
         aesthetics;
         dofnum;
+        constraints;
     end
     methods
         function obj = robot(properties)
             obj.links = properties.links;
-            obj.connections = properties.connections;
+            obj.constraints = properties.constraints;
             obj.dof = properties.dof;
             obj.dofnum = properties.dofnum;
             obj.aesthetics = properties.aesthetics;
-            obj.T = @(x)buildtransform(obj.links, obj.connections, x, obj.dof);
-            obj.position = zeros(3,length(obj.T));
+            obj.T = buildtransform(properties);
             obj.workspace = properties.workspace;
-            obj.move(zeros(obj.dofnum, 1));
-            
+            obj.move(0,0,0,0);
         end
         
-        function obj = move(obj,vector)
+        function obj = move(obj,varargin)
             contact = 0;
-            transform = obj.T(vector);
+            transform = obj.T(varargin{:});
             index = 1:4:length(transform);
             for i = 1:length(index)
                 points(:,i) = transform(:,index(i):index(i)+3)*[0;0;0;1];
