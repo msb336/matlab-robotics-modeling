@@ -1,15 +1,19 @@
-function [ rprops ] = testbot()
+function [ rprops ] = testbot
+
+rprops.bar = 100;
+rprops.effector = 160;
+rprops.id = sprintf('testbotL%dL%d', rprops.bar, rprops.effector);
 
 rprops.links = [20 0 0;...
     0 0 40;...
-    0 0 40+80; ...
-    0 40 40+80; ...
+    0 0 40+rprops.bar; ...
+    0 40 40+rprops.bar; ...
     0 40 40; ...
     40 0 40;...
-    40 0 40+80; ...
-    40 40 40+80+10; ...
+    40 0 40+rprops.bar; ...
+    40 40 40+rprops.bar+10; ...
     40 40 50; ...
-    0 -80 80+40]*0.0393701;
+    0 -rprops.effector rprops.bar+40]*0.0393701;
 
 connections(1).type = 'fixed';
 connections(1).forced = 1;
@@ -44,7 +48,7 @@ rprops.dof{6} = {'thx', 4};
 rprops.dofnum = 4;
 rprops.workspace = [1 1 0; 12 1 0; 12 9.5 0; 1 9.5 0; 1 1 0];
 
-%% for
+
 le = norm(rprops.links(10,:) - rprops.links(3,:));
 l1 = norm(rprops.links(3,:)-rprops.links(2,:));
 h = rprops.links(2,3);
@@ -53,12 +57,14 @@ rprops.l1 = l1;
 rprops.l2 = le;
 rprops.h = h;
 
-% y = rprops.l1*cos(th) + rprops.h - rprops.l2*sin(secondary)
-% 0 = rprops.l1*cos(th) + rprops.h - rprops.l2*sin(secondary)
-% rprops.l2*sin(secondary) = rprops.l1*cos(th) + rprops.h
-% 
-% sin(secondary) = (rprops.l1*cos(th) + rprops.h)/rprops.l2
-% secondary = asin((rprops.l1*cos(th) + rprops.h)/rprops.l2);
-
 rprops.thfunc = @(x)asin((rprops.l1*cos(x) + rprops.h)/rprops.l2);
+
+if exist([rprops.id '.mat'], 'file') 
+    load(rprops.id);
+    rprops.relationship = relationship;
+else
+    rprops.relationship = false;
+end
+    
+
 end
