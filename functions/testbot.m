@@ -46,7 +46,7 @@ rprops.dof{1} = {'x',1, 'thz', 2};
 rprops.dof{2} = {'thx', 3};
 rprops.dof{6} = {'thx', 4};
 rprops.dofnum = 4;
-rprops.workspace = [1 1 0; 12 1 0; 12 9.5 0; 1 9.5 0; 1 1 0];
+rprops.workspace = [1 1 0; 12 1 0; 12 9.5 0; 1 9.5 0; 1 1 0]+[0 1 0];
 
 
 le = norm(rprops.links(10,:) - rprops.links(3,:));

@@ -49,20 +49,21 @@ classdef robot <handle
         end
         
         function obj = sweep(obj)
+            
             obj.relcheck();
             rel = obj.relationship(obj.relationship(:,1) > 0,:);
             maxx = max(rel(:,1));
-            minx = min(rel(:,1));
+            minx = min(rel(:,1)+0.5);
             r = maxx - minx;
             desx = @(x)r*0.5*sin(x)+(maxx + minx)/2;
             
             for i = 0:0.1:11
                 [th] = interp1(rel(:,1), rel(:,2:3), desx(i));
-                
                 obj.move(i, pi, th(2), th(1));
                 obj.show(1)
                 pause(0.0001);
             end
+            
         end
         
         
@@ -87,17 +88,11 @@ classdef robot <handle
             contact = 0;
             transform = obj.T(varargin{:});
             index = 1:4:length(transform);
+            points = zeros(4, length(obj.links));
             for i = 1:length(index)
                 points(:,i) = transform(:,index(i):index(i)+3)*[0;0;0;1];
                 a = transform(:,index(i):index(i)+3)*[0 1 0 0 0 0; 0 0 0 1 0 0; 0 0 0 0 0 1;ones(1,6)];
                 obj.ax{i} = a(1:3,:);
-                %                 if points(3,i) < 0
-                %                     clc
-                %                     s = warning('robot is contacting ground\n');
-                %                     fprintf(s);
-                %                     contact = 1;
-                %                     break
-                %                 end
             end
             if ~contact
                 obj.position = points(1:3,:);
