@@ -10,11 +10,16 @@ classdef robot <handle
     %       joints 1 and 2 are connected
     %       dof - joint type. input is a cell array, where each individual
     %       cell details the degrees of freedom of that joint
+    %
     %       T - nx1 translation matrix function, where n is the number of
     %       joints in the system.
+    %
     %       position - current 3d position of each joint from the global
     %       reference frame
-    %       path - path of end effector.
+    %
+    %       path - path of end effector. Currently set to only store output
+    %       inside of the plane defined by the workspace. To alter this
+    %       delete lines 102-106
     %
     %   Methods:
     %       move(vector) - applies the transformation dictated by vector to
