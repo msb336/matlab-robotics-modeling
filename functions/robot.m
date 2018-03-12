@@ -27,12 +27,19 @@ classdef robot <handle
     %       show() - plot current robot position
     
     properties
+        
+        position
+        path = []
+        
+    end
+    
+    properties(Access = private)
+        font
+        lastpos
         links
         connections
         dof
         T
-        position
-        path = []
         workspace
         aesthetics
         dofnum
@@ -42,7 +49,9 @@ classdef robot <handle
         robotid
         relationship
     end
+    
     methods
+        
         function obj = drawtest(obj)
             obj.relcheck();
             rel = obj.relationship(obj.relationship(:,1) > 0,:);
@@ -54,28 +63,27 @@ classdef robot <handle
         end
         
         function obj = sweep(obj)
-            
             obj.relcheck();
-            rel = obj.relationship(obj.relationship(:,1) > 0,:);
+            rel = obj.relationship;
             maxx = max(rel(:,1));
             minx = min(rel(:,1)+0.5);
             r = maxx - minx;
             desx = @(x)r*0.5*sin(x)+(maxx + minx)/2;
             
             for i = 0:0.1:11
-                [th] = interp1(rel(:,1), rel(:,2:3), desx(i));
+                [th] = obj.getthetas(desx(i));
                 obj.move(i, pi, th(2), th(1));
-                obj.show(1)
+                obj.show(1);
                 pause(0.0001);
             end
-            
         end
         
         
         
         
+        
         %% Core Functions
-        function obj = robot(properties)
+        function obj = robot(properties, inputfont)
             obj.robotid = properties.id;
             obj.links = properties.links;
             obj.constraints = properties.constraints;
@@ -85,11 +93,33 @@ classdef robot <handle
             obj.T = buildtransform(properties);
             obj.workspace = properties.workspace;
             obj.constraint_equation = properties.thfunc;
-            obj.relationship = properties.relationship;
+            obj.relationship = properties.relationship(properties.relationship(:,1) > 0,:);
             obj.move(0,0,0,0);
+            if nargin == 2
+                obj.font = inputfont;
+            end
+        end
+        
+        function th = getthetas(obj, pos)
+            [th] = interp1(obj.relationship(:,1), obj.relationship(:,2:3), pos);
+            th = fliplr(th);
+        end
+        
+        function obj = moveto(obj, x,y, up)
+            obj.relcheck;
+            th = obj.getthetas(x);
+            
+            if up
+                th(1) = th(1) - pi/16;
+            end
+            
+            obj.move(y, pi, th(1), th(2));
+            obj.show(1);
+            obj.lastpos = [x,y,pi];
         end
         
         function obj = move(obj,varargin)
+            
             contact = 0;
             transform = obj.T(varargin{:});
             index = 1:4:length(transform);
@@ -108,6 +138,7 @@ classdef robot <handle
                     obj.path = [obj.path [obj.position(1:2,end); 0]];
                 end
             end
+            obj.lastpos = [obj.position(1, end), varargin{1}, varargin{2}];
         end
         
         function obj = show(obj, a)
@@ -123,7 +154,7 @@ classdef robot <handle
             end
             if a
                 for i = 1:length(obj.links)
-                    plot3dvectors(obj.path, '--')
+                    plot3dvectors(obj.path, '-')
                 end
             end
             bounds = [-5 15 -5 15 -5 10];
@@ -154,13 +185,23 @@ classdef robot <handle
             end
             save(['data/' obj.robotid '.mat'], 'relationship');
         end
+        
         function obj = relcheck(obj)
             if obj.relationship == false
                 error('No relationship calibration');
             end
-            rel = obj.relationship(obj.relationship(:,1) > 0,:);
         end
         
+        function obj = drawletter(obj, letter)
+            obj.relcheck;
+            coords = obj.font(letter);
+            ref = obj.lastpos;
+            for i = 1:length(coords)
+                y = coords(i,1)/100 +ref(2);
+                x = coords(i,2)/100 + ref(1);
+                obj.moveto(x,y, false);
+                pause(0.0000001);
+            end
+        end
     end
 end
-
