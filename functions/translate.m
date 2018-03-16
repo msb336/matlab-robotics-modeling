@@ -1,7 +1,6 @@
 function [ tmat ] = translate( x,y )
 %translate Summary of this function goes here
 tmat = [[eye(3); 0 0 0], [0;0;0;1]];
-
 if nargin == 2
     switch y
         case 'x'
@@ -14,6 +13,5 @@ if nargin == 2
 else     
     tmat =[[eye(3); 0 0 0], [x(1);x(2);x(3);1]];
 end
-
 end
 

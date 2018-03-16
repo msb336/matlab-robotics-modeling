@@ -1,31 +1,11 @@
-function [sortedbydistance] = img2xy(imagefile)
+function [x,y] = img2xy(imagefile)
 %IMG2XYZ convert image to xy vector
 img = imread(imagefile);
- bw = double(rgb2gray(img))/255;
+ bw = rgb2gray(img);
 
- new = filter(bw< 0.1);
+ new = filter(~bw);
  ind = find(new);
- [y,x] = ind2sub(size(new), ind);
- p = [x y];
- centroid = sum(p)/length(p);
- distance_from_centroid = p - centroid;
- norm_dist = (distance_from_centroid(:,1).^2 + distance_from_centroid(:,2).^2).^0.5;
- first_pt = norm_dist == max(norm_dist);
- sortedbydistance = zeros(size(p));
- sortedbydistance(1,:) = p(first_pt,:);
- p(first_pt,:) = [];
- for j = 2:length(sortedbydistance)
-     n = sortedbydistance(j-1,:) - p;
-     dist = (n(:,1).^2 + n(:,2).^2).^0.5;
-     logi = dist == min(dist);
-     if length(logi(logi)) ~= 1
-         logi = find(logi);
-         logi = logi(1);
-     end
-     sortedbydistance(j,:) = p(logi,:);
-     p(logi,:) = [];
- end
-sortedbydistance = fliplr(sortedbydistance);
+ [x,y] = ind2sub(size(new), ind);
 end
 
 
@@ -63,4 +43,5 @@ end
 newlist = binary;
 end
     
+
 
